@@ -832,7 +832,6 @@ public class PrelucrareaImaginilorLaborator extends Application {
 
             vbLaplacian.getChildren().addAll(vbLaplacian);
             spH.setContent(vbLaplacian);
-            spH.setContent(vbLaplacian);
 
 
             Stage HistogramStage = new Stage();
@@ -1318,15 +1317,13 @@ public class PrelucrareaImaginilorLaborator extends Application {
         return gray;
     }
 
-    private BufferedImage filterLaplacian(BufferedImage src) {
-        BufferedImage grayScale = this.getGrayscaleImage(src);
+    public BufferedImage filterLaplacian(BufferedImage src) {
+        BufferedImage grayScale = getGrayscaleImage(src);
         BufferedImage dst = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
-
         int width = src.getWidth();
         int height = src.getHeight();
         double[][] v = new double[3][3];
-
-        // Coeficienții măștii
+        //coeficientii mastii
         v[0][0] = -1;
         v[0][1] = -1;
         v[0][2] = -1;
@@ -1336,29 +1333,20 @@ public class PrelucrareaImaginilorLaborator extends Application {
         v[2][0] = -1;
         v[2][1] = -1;
         v[2][2] = -1;
-
-        // 3*3 Laplacian filter (-1,-1,-1), (-1,8,-1), (-1,-1,-1)
+        //33 Laplacian filter (-1,-1,-1), (-1,8,-1), (-1,-1,-1)
         for (int y = 1; y < height - 1; y++) {
             for (int x = 1; x < width - 1; x++) {
                 int sum = 0;
-
                 for (int m = -1; m < 2; m++) {
                     for (int n = -1; n < 2; n++) {
                         int pixel = src.getRGB(x + m, y + n);
-                        sum += v[m + 1][n + 1] * (pixel & 0xFF);
+                        sum += v[m+1][n+1] * (pixel & 0xff);
                     }
                 }
-
-                // Limităm suma la intervalul 0-255
-                sum = Math.min(Math.max(sum, 0), 255);
-
-                int a = ((grayScale.getRGB(x, y) >> 24) & 0xFF);
-                // Asigurăm că valorile RGB sunt în intervalul corect și construim pixelul de destinație
-                int rgb = (a << 24) | (sum << 16) | (sum << 8) | sum;
-                dst.setRGB(x, y, rgb);
+                int a = ((grayScale.getRGB(x, y) >> 24) & 0xff);
+                dst.setRGB(x, y, ((a << 24) | (sum << 16) | (sum << 8) | (sum)));
             }
         }
-
         return dst;
     }
 
@@ -1675,6 +1663,92 @@ public class PrelucrareaImaginilorLaborator extends Application {
 
         }
 
+    }
+    public BufferedImage minim(BufferedImage src) {
+        BufferedImage dst = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
+        int i,j;
+        int w,h;
+        int k,aux;
+        int m,n;
+        int med;
+        int[] sir=new int[9];
+        w=src.getWidth();
+        h=src.getHeight();
+        for(i=1;i<w-1;i++) {
+            for(j=1;j<h-1;j++){
+                //formarea unui sir din elementele vecinatatii 3x3
+                k=0;
+                for(m=-1;m<2;m++) {
+                    for(n=-1;n<2;n++){
+                        int pixel = src.getRGB(i+m,j+n);
+                        Color c = new Color(pixel, true);
+                        sir[k]=c.getRed();
+                        k++;
+                    }
+                }
+                //ordonarea crescatoare a valorilor pixelilor
+                //metoda BUBBLESORT
+                k=0;
+                while(k==0){
+                    k=1;
+                    for(m=0;m<8;m++){
+                        if(sir[m]>sir[m+1]){
+                            aux=sir[m];
+                            sir[m]=sir[m+1];
+                            sir[m+1]=aux;
+                            k=0;
+                        }
+                    }
+                }
+                //elementul median
+                med=sir[0];
+                Color nc = new Color(med,med,med);
+                dst.setRGB(i, j, nc.getRGB());
+            }
+        }
+        return dst;
+    }
+
+    public BufferedImage maxim(BufferedImage src) {
+        BufferedImage dst = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
+        int i,j;
+        int w,h;
+        int k,aux;
+        int m,n;
+        int med;
+        int[] sir=new int[9];
+        w=src.getWidth();
+        h=src.getHeight();
+        for(i=1;i<w-1;i++) {
+            for(j=1;j<h-1;j++){
+                //formarea unui sir din elementele vecinatatii 3x3
+                k=0;
+                for(m=-1;m<2;m++) {
+                    for(n=-1;n<2;n++){
+                        int pixel = src.getRGB(i+m,j+n);
+                        Color c = new Color(pixel, true);
+                        sir[k]=c.getRed();
+                        k++;
+                    }
+                }
+                k=0;
+                while(k==0){
+                    k=1;
+                    for(m=0;m<8;m++){
+                        if(sir[m]>sir[m+1]){
+                            aux=sir[m];
+                            sir[m]=sir[m+1];
+                            sir[m+1]=aux;
+                            k=0;
+                        }
+                    }
+                }
+                med=sir[8];
+                Color nc = new Color(med,med,med);
+                dst.setRGB(i, j, nc.getRGB());
+            }
+        }
+        return dst;
     }
 
 
